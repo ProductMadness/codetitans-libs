@@ -627,7 +627,7 @@ namespace CodeTitans.Core.Generics
                 throw new ArgumentNullException("writer");
 
             writer.WriteStartDocument();
-            writer.WriteDocType("plist", "-//Apple Computer//DTD PLIST 1.0//EN", "http://www.apple.com/DTDs/PropertyList-1.0.dtd", null);
+            // writer.WriteDocType("plist", "-//Apple Computer//DTD PLIST 1.0//EN", "http://www.apple.com/DTDs/PropertyList-1.0.dtd", null);
             writer.WriteStartElement("plist");
             writer.WriteAttributeString("version", "1.0");
             WriteItem(writer, root);

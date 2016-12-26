@@ -33,10 +33,4 @@ using System.Reflection;
 //      Build Number
 //      Revision
 [assembly: AssemblyVersion("1.8.3.0")]
-[assembly: AssemblyFileVersion("1.8.3.0")]
-
-#endif
-
-#if !PocketPC && !WINDOWS_PHONE && !SILVERLIGHT
-[assembly: System.Security.AllowPartiallyTrustedCallers]
 #endif

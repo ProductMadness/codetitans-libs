@@ -51,16 +51,5 @@ namespace CodeTitans.JSon
         {
         }
 
-#if !PocketPC && !WINDOWS_PHONE && !SILVERLIGHT && !WINDOWS_STORE
-        /// <summary>
-        /// Constructor required by serialization.
-        /// </summary>
-        [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter = true)]
-        protected JSonException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
-            : base(info, context)
-        {
-            // PH: NOTE: as for now, I don't see a reason, why to also serialize other properties of this class beside message...
-        }
-#endif
     }
 }

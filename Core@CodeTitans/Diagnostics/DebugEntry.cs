@@ -25,9 +25,6 @@ namespace CodeTitans.Diagnostics
     /// <summary>
     /// Class wrapping single debug log entry.
     /// </summary>
-#if !PocketPC
-    [System.Diagnostics.DebuggerDisplay("Category={Category}, Message={Message}")]
-#endif
 #if DEBUGLOG_PUBLIC
     public
 #else

@@ -83,11 +83,7 @@ namespace CodeTitans.Services.Internals
         private static object PrivateCreation(IServiceProviderEx provider, Type serviceType, object[] serviceArgs)
         {
             // create new instance of the service:
-#if PocketPC
             var service = Activator.CreateInstance(serviceType);
-#else
-            var service = CreateServiceInstance(provider, serviceType, serviceArgs);
-#endif
 
             if (service == null)
                 throw new ServiceCreationException(serviceType);
@@ -97,78 +93,11 @@ namespace CodeTitans.Services.Internals
             // update the reference to the service provider:
             if (site != null)
             {
-#if PocketPC
                 // call this function in place of constructor:
                 site.SetSiteArguments(serviceArgs);
-#endif
-                site.SetSite(provider);
             }
 
             return service;
         }
-
-#if !PocketPC
-        private static object CreateServiceInstance(IServiceProviderEx provider, Type serviceType, object[] serviceArgs)
-        {
-#if WINDOWS_STORE || WINDOWS_APP
-
-            // if arguments were specified directly, simply create new object:
-            if (serviceArgs != null)
-                return Activator.CreateInstance(serviceType, serviceArgs);
-
-            // or loop till find first constructor, for which it was possible to create all required arguments:
-            foreach (var method in serviceType.GetTypeInfo().DeclaredConstructors)
-            {
-                var paramTypes = method.GetParameters();
-                var paramValues = new object[paramTypes.Length];
-                bool failedToInitialize = false;
-
-                for (int i = 0; i < paramTypes.Length && !failedToInitialize; i++)
-                {
-                    // get the service for specified argument's type (what returns null on failure):
-                    paramValues[i] = provider.GetService(paramTypes[i].ParameterType);
-                    failedToInitialize = paramValues[i] == null;
-                }
-
-                if (failedToInitialize)
-                    continue;
-
-                return method.Invoke(paramValues);
-            }
-
-            // notify, that it was impossible to initialize the required service
-            throw new ServiceCreationException(serviceType);
-#else
-
-            // if arguments specified directly, simply create new object:
-            if (serviceArgs != null)
-                return Activator.CreateInstance(serviceType, serviceArgs);
-
-            // or loop till find first constructor, for which it was possible to create all required arguments:
-            foreach (var method in serviceType.GetConstructors())
-            {
-                var paramTypes = method.GetParameters();
-                var paramValues = new object[paramTypes.Length];
-                bool failedToInitialize = false;
-
-                for (int i = 0; i < paramTypes.Length && !failedToInitialize; i++)
-                {
-                    // get the service for specified argument's type (what returns null on failure):
-                    paramValues[i] = provider.GetService(paramTypes[i].ParameterType);
-                    failedToInitialize = paramValues[i] == null;
-                }
-
-                if (failedToInitialize)
-                    continue;
-
-                return method.Invoke(paramValues);
-            }
-
-            // notify, that it was impossible to initialize the required service
-            throw new ServiceCreationException(serviceType);
-
-#endif
-        }
-#endif
     }
 }

@@ -33,7 +33,6 @@ namespace CodeTitans.Helpers
         /// </summary>
         public static bool TryParseDouble(string s, NumberStyles style, out double result)
         {
-#if PocketPC
             try
             {
                 result = double.Parse(s, style, CultureInfo.InvariantCulture);
@@ -54,10 +53,6 @@ namespace CodeTitans.Helpers
                 result = 0;
                 return false;
             }
-
-#else
-            return double.TryParse(s, style, CultureInfo.InvariantCulture, out result);
-#endif
         }
 
         /// <summary>
@@ -65,7 +60,6 @@ namespace CodeTitans.Helpers
         /// </summary>
         public static bool TryParseDecimal(string s, NumberStyles style, out decimal result)
         {
-#if PocketPC
             try
             {
                 result = decimal.Parse(s, style, CultureInfo.InvariantCulture);
@@ -86,15 +80,10 @@ namespace CodeTitans.Helpers
                 result = Decimal.Zero;
                 return false;
             }
-
-#else
-            return decimal.TryParse(s, style, CultureInfo.InvariantCulture, out result);
-#endif
         }
 
         public static bool TryParseInt32(string s, out Int32 result)
         {
-#if PocketPC
             try
             {
                 result = Int32.Parse(s);
@@ -115,14 +104,10 @@ namespace CodeTitans.Helpers
                 result = 0;
                 return false;
             }
-#else
-            return Int32.TryParse(s, out result);
-#endif
         }
 
         public static bool TryParseUInt32(string s, out UInt32 result)
         {
-#if PocketPC
             try
             {
                 result = UInt32.Parse(s);
@@ -143,14 +128,10 @@ namespace CodeTitans.Helpers
                 result = 0;
                 return false;
             }
-#else
-            return UInt32.TryParse(s, out result);
-#endif
         }
 
         public static bool TryParseInt64(string s, out Int64 result)
         {
-#if PocketPC
             try
             {
                 result = Int64.Parse(s);
@@ -171,14 +152,10 @@ namespace CodeTitans.Helpers
                 result = 0;
                 return false;
             }
-#else
-            return Int64.TryParse(s, out result);
-#endif
         }
 
         public static bool TryParseUInt64(string s, out UInt64 result)
         {
-#if PocketPC
             try
             {
                 result = UInt64.Parse(s);
@@ -199,14 +176,10 @@ namespace CodeTitans.Helpers
                 result = 0;
                 return false;
             }
-#else
-            return UInt64.TryParse(s, out result);
-#endif
         }
 
         public static bool TryParseHexInt32(string s, out Int32 result)
         {
-#if PocketPC
             try
             {
                 result = int.Parse(s, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
@@ -227,9 +200,6 @@ namespace CodeTitans.Helpers
                 result = 0;
                 return false;
             }
-#else
-            return int.TryParse(s, NumberStyles.HexNumber, null, out result);
-#endif
         }
     }
 }

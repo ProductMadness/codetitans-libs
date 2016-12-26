@@ -61,15 +61,6 @@ namespace CodeTitans.JSon
         {
         }
 
-#if !PocketPC && !WINDOWS_PHONE && !SILVERLIGHT && !WINDOWS_STORE
-        /// <summary>
-        /// Init constructor.
-        /// </summary>
-        private JSonMemberMissingException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
-            : base (info, context)
-        {
-        }
-#endif
 
         #region Properties
 

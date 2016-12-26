@@ -48,18 +48,6 @@ namespace CodeTitans.Services
             ServiceType = serviceType;
         }
 
-#if !PocketPC && !WINDOWS_PHONE && !SILVERLIGHT && !WINDOWS_STORE && !WINDOWS_APP
-        /// <summary>
-        /// Constructor required by serialization.
-        /// </summary>
-        [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter = true)]
-        private ServiceCreationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
-            : base(info, context)
-        {
-            // PH: NOTE: as for now, I don't see a reason, why to also serialize other properties of this class beside message...
-        }
-#endif
-
         #region Properties
 
         /// <summary>

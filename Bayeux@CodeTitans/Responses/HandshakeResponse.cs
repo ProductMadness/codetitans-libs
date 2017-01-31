@@ -68,6 +68,8 @@ namespace CodeTitans.Bayeux.Responses
                 {
                     types |= BayeuxConnectionTypesHelper.Parse(connectionType.StringValue);
                 }
+
+                SupportedConnectionTypes = types;
             }
         }
 

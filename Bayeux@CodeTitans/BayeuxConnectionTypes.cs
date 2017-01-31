@@ -52,7 +52,12 @@ namespace CodeTitans.Bayeux
         /// <summary>
         /// Connection will respond to each request.
         /// </summary>
-        RequestResponse = 16
+        RequestResponse = 16,
+
+        /// <summary>
+        /// Web sockets
+        /// </summary>
+        WebSocket = 32
     }
 
     /// <summary>
@@ -76,6 +81,8 @@ namespace CodeTitans.Bayeux
                 return "flash";
             if (type == BayeuxConnectionTypes.RequestResponse)
                 return "request-response";
+            if (type == BayeuxConnectionTypes.WebSocket)
+                return "websocket";
 
             return null;
         }
@@ -97,6 +104,8 @@ namespace CodeTitans.Bayeux
                 result.Add("flash");
             if ((types & BayeuxConnectionTypes.RequestResponse) == BayeuxConnectionTypes.RequestResponse)
                 result.Add("request-response");
+            if ((types & BayeuxConnectionTypes.WebSocket) == BayeuxConnectionTypes.WebSocket)
+                result.Add("websocket");
 
             return result.ToArray();
         }
@@ -120,6 +129,9 @@ namespace CodeTitans.Bayeux
 
             if (string.Compare(type, "request-response", StringComparison.OrdinalIgnoreCase) == 0)
                 return BayeuxConnectionTypes.RequestResponse;
+
+            if (string.Compare(type, "websocket", StringComparison.OrdinalIgnoreCase) == 0)
+                return BayeuxConnectionTypes.WebSocket;
 
             //throw new ArgumentOutOfRangeException("type");
             return BayeuxConnectionTypes.None;

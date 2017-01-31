@@ -27,6 +27,8 @@ using CodeTitans.Bayeux.Requests;
 using CodeTitans.Bayeux.Responses;
 using CodeTitans.Diagnostics;
 using CodeTitans.JSon;
+using WebSocketSharp;
+
 
 namespace CodeTitans.Bayeux
 {
@@ -40,6 +42,8 @@ namespace CodeTitans.Bayeux
         private const int DefaultNumberOfConnectRetries = 10;
 
         private readonly object _syncObject;
+        private WebSocket _webSocket;
+        private string _url;
         private readonly IHttpDataSource _httpConnection;
         private readonly IHttpDataSource _httpLongPollingConnection;
         private string _clientID;
@@ -96,6 +100,52 @@ namespace CodeTitans.Bayeux
         public BayeuxConnection(string url)
             : this(new HttpDataSource(url, null, DefaultContentType), new HttpDataSource(url, null, DefaultContentType))
         {
+            if (url.StartsWith("http"))
+            {
+                _url = "ws" + url.Substring(4);
+                DefaultConnectionType = BayeuxConnectionTypes.WebSocket;
+                _webSocket = new WebSocket(_url);
+                _webSocket.OnOpen += (sender, args) =>
+                {
+				};
+                _webSocket.OnClose += (sender, args) =>
+                {
+					DataSource_OnDataReceiveFailed(_webSocket, new HttpDataSourceEventArgs(null, HttpStatusCode.ServiceUnavailable, "Disconnected"));
+					if (_state != BayeuxConnectionState.Connected)
+					{
+						Cancel();
+					}
+					else
+					{
+						AbandonConnection();
+					}
+					OnDisconnected(null);
+                };
+                _webSocket.OnError += (sender, args) =>
+                {
+					DataSource_OnDataReceiveFailed(_webSocket, new HttpDataSourceEventArgs(null, HttpStatusCode.ServiceUnavailable, "Disconnected"));
+					if (_state == BayeuxConnectionState.Disconnected)
+					{
+						DefaultConnectionType = BayeuxConnectionTypes.LongPolling;
+					}
+					if (_state != BayeuxConnectionState.Connected)
+					{
+						Cancel();
+					}
+					else
+					{
+						AbandonConnection();
+					}
+					OnDisconnected(null);
+                };
+                _webSocket.OnMessage += (sender, args) =>
+                {
+					DataSource_OnDataReceived(_webSocket,
+                        new HttpDataSourceEventArgs(null, HttpStatusCode.OK, null, args.Data, args.RawData, null));
+
+                };
+                _webSocket.Connect();
+            }
         }
 
         /// <summary>
@@ -104,6 +154,7 @@ namespace CodeTitans.Bayeux
         public BayeuxConnection(IHttpDataSource connection)
             : this(connection, null)
         {
+            DefaultConnectionType = BayeuxConnectionTypes.LongPolling;
         }
 
         /// <summary>
@@ -127,6 +178,10 @@ namespace CodeTitans.Bayeux
             _httpConnection = connection;
             _httpConnection.DataReceived += DataSource_OnDataReceived;
             _httpConnection.DataReceiveFailed += DataSource_OnDataReceiveFailed;
+
+            DefaultConnectionType = BayeuxConnectionTypes.LongPolling;
+            _webSocket = null;
+            _url = null;
 
             if (longPollingConnection != null)
             {
@@ -509,7 +564,7 @@ namespace CodeTitans.Bayeux
         {
             get
             {
-                return BayeuxConnectionTypes.LongPolling | BayeuxConnectionTypes.CallbackPolling | BayeuxConnectionTypes.Iframe;
+                return BayeuxConnectionTypes.LongPolling | BayeuxConnectionTypes.CallbackPolling | BayeuxConnectionTypes.Iframe | BayeuxConnectionTypes.WebSocket;
             }
         }
 
@@ -535,6 +590,8 @@ namespace CodeTitans.Bayeux
 
         #region Bayeux Connect
 
+        public BayeuxConnectionTypes DefaultConnectionType { get; private set; }
+
         /// <summary>
         /// Sends connect request to the server.
         /// </summary>
@@ -543,7 +600,7 @@ namespace CodeTitans.Bayeux
             if (_state != BayeuxConnectionState.Connected)
                 throw new InvalidOperationException("Not connected to the server - handshake must be performed first");
 
-            SendRequest(new ConnectRequest(ClientID, BayeuxConnectionTypes.LongPolling, data, ext), asynchronous);
+            SendRequest(new ConnectRequest(ClientID, DefaultConnectionType, data, ext), asynchronous);
         }
 
         /// <summary>
@@ -817,10 +874,18 @@ namespace CodeTitans.Bayeux
                     dataToSend = SerializeRequest(message);
             }
 
-            if (asynchronous)
-                _httpConnection.SendRequestAsync(null, dataToSend, message.RequestMethod, HttpDataSourceResponseType.AsString);
+            // Protocol upgrade to websocket, and protect from closing
+            if (DefaultConnectionType == BayeuxConnectionTypes.WebSocket && _webSocket != null)
+            {
+                _webSocket.Send(dataToSend);
+            }
             else
-                _httpConnection.SendRequest(null, dataToSend, message.RequestMethod, HttpDataSourceResponseType.AsString);
+            {
+                if (asynchronous)
+                    _httpConnection.SendRequestAsync(null, dataToSend, message.RequestMethod, HttpDataSourceResponseType.AsString);
+                else
+                    _httpConnection.SendRequest(null, dataToSend, message.RequestMethod, HttpDataSourceResponseType.AsString);
+            }
         }
 
         /// <summary>
@@ -910,7 +975,8 @@ namespace CodeTitans.Bayeux
                             throw new BayeuxException("Invalid ClientID received from server", request, handshakeResponse, message);
                         }
 
-                        OnConnected(new BayeuxConnectionEventArgs(this, httpStatusCode, httpStatusDescription, rawMessage, message, handshakeResponse));
+                         OnConnected(new BayeuxConnectionEventArgs(this, httpStatusCode, httpStatusDescription, rawMessage, message, handshakeResponse));
+
                     }
                     else
                     {
@@ -927,6 +993,7 @@ namespace CodeTitans.Bayeux
                     // inform that disconnection succeeded:
                     _state = BayeuxConnectionState.Disconnected;
                     ClientID = null;
+                    DefaultConnectionType = BayeuxConnectionTypes.LongPolling;
 
                     OnDisconnected(new BayeuxConnectionEventArgs(this, response.Successful ? HttpStatusCode.OK : HttpStatusCode.BadRequest, null, rawMessage, message, response));
                 }

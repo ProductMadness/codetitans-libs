@@ -10,15 +10,16 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CodeTitans.Bayeux</RootNamespace>
     <AssemblyName>CodeTitans.Bayeux</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\DesktopVS2010\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET_2_COMPATIBLE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -130,6 +131,10 @@
     <ProjectReference Include="..\JSON%40CodeTitans\CodeTitans.JSon.VS2010.csproj">
       <Project>{0D7442B5-7447-46EC-B2CD-55369F13E2B1}</Project>
       <Name>CodeTitans.JSon.VS2010</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\websocket-sharp\websocket.csproj">
+      <Project>{b357bac7-529e-4d81-a0d2-71041b19c8de}</Project>
+      <Name>websocket</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -25,6 +25,7 @@ using System.Net;
 using System.Text;
 using CodeTitans.Bayeux.Requests;
 using CodeTitans.Bayeux.Responses;
+using CodeTitans.Core;
 using CodeTitans.Diagnostics;
 using CodeTitans.JSon;
 using WebSocketSharp;
@@ -993,7 +994,6 @@ namespace CodeTitans.Bayeux
                     // inform that disconnection succeeded:
                     _state = BayeuxConnectionState.Disconnected;
                     ClientID = null;
-                    DefaultConnectionType = BayeuxConnectionTypes.LongPolling;
 
                     OnDisconnected(new BayeuxConnectionEventArgs(this, response.Successful ? HttpStatusCode.OK : HttpStatusCode.BadRequest, null, rawMessage, message, response));
                 }

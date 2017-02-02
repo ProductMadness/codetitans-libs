@@ -27,7 +27,7 @@ namespace CodeTitans.Helpers
     /// <summary>
     /// Interface allowing to read characters.
     /// </summary>
-#if DEBUG && CODETITANS_LIB_CORE
+#if CODETITANS_LIB_CORE
     public
 #else
     internal

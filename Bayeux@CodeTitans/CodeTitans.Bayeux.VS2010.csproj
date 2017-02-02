@@ -27,7 +27,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\bin\.net_4.0\1.x\</OutputPath>
-    <DefineConstants>TRACE;$(AdditionalDefines)</DefineConstants>
+    <DefineConstants>TRACE;NET_2_COMPATIBLE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\bin\.net_4.0\1.x\CodeTitans.Bayeux.xml</DocumentationFile>

@@ -882,6 +882,8 @@ namespace CodeTitans.Bayeux
             }
             else
             {
+                DefaultConnectionType = BayeuxConnectionTypes.LongPolling;
+
                 if (asynchronous)
                     _httpConnection.SendRequestAsync(null, dataToSend, message.RequestMethod, HttpDataSourceResponseType.AsString);
                 else

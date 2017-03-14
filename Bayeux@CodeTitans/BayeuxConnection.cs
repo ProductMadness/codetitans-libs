@@ -98,10 +98,10 @@ namespace CodeTitans.Bayeux
         /// <summary>
         /// Init constructor.
         /// </summary>
-        public BayeuxConnection(string url)
+        public BayeuxConnection(string url, bool allowWebsocket = true)
             : this(new HttpDataSource(url, null, DefaultContentType), new HttpDataSource(url, null, DefaultContentType))
         {
-            if (url.StartsWith("http"))
+            if (url.StartsWith("http") && allowWebsocket)
             {
                 _url = "ws" + url.Substring(4);
                 DefaultConnectionType = BayeuxConnectionTypes.WebSocket;
@@ -916,8 +916,11 @@ namespace CodeTitans.Bayeux
         /// </summary>
         public void Cancel()
         {
-            if (_httpConnection.IsActive)
-                _httpConnection.Cancel();
+            if(DefaultConnectionType != BayeuxConnectionTypes.WebSocket)
+            {
+                if (_httpConnection.IsActive)
+                    _httpConnection.Cancel();
+            }
 
             // check if cancelled the handshake request:
             if (_state == BayeuxConnectionState.Connecting)
@@ -1084,6 +1087,12 @@ namespace CodeTitans.Bayeux
             {
                 if (_jsonWriter != null)
                     _jsonWriter.Dispose();
+
+                if (_webSocket != null)
+                {
+                    _webSocket.Close();
+                    _webSocket = null;
+                }
             }
         }
 

@@ -561,13 +561,17 @@ Extended Payload Length: {7}
       Ext.ReadBytesAsync(stream,
         2,
         header => {
-          if (header.Length != 2)
-            throw new WebSocketException (
-              "The header part of a frame cannot be read from the data source.");
-
-          var frame = read (header, stream, unmask);
-          if (completed != null)
-            completed (frame);
+            if (header.Length != 2)
+            {
+                error(new WebSocketException(
+                    "The header part of a frame cannot be read from the data source."));
+            }
+            else
+            {
+                var frame = read (header, stream, unmask);
+                if (completed != null)
+                    completed(frame);
+            }
         },
         error);
     }

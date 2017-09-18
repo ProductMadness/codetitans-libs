@@ -63,7 +63,6 @@ namespace WebSocketSharp.Server
     private System.Net.IPAddress    _address;
     private string                  _hostname;
     private HttpListener            _listener;
-    private Logger                  _logger;
     private int                     _port;
     private Thread                  _receiveThread;
     private string                  _rootPath;
@@ -300,7 +299,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -348,7 +347,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -356,23 +355,7 @@ namespace WebSocketSharp.Server
       }
     }
 
-    /// <summary>
-    /// Gets the logging functions.
-    /// </summary>
-    /// <remarks>
-    /// The default logging level is <see cref="LogLevel.Error"/>. If you would like to change it,
-    /// you should set the <c>Log.Level</c> property to any of the <see cref="LogLevel"/> enum
-    /// values.
-    /// </remarks>
-    /// <value>
-    /// A <see cref="Logger"/> that provides the logging functions.
-    /// </value>
-    public Logger Log {
-      get {
-        return _logger;
-      }
-    }
-
+   
     /// <summary>
     /// Gets the port on which to listen for incoming requests.
     /// </summary>
@@ -400,7 +383,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -428,7 +411,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -451,7 +434,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -475,7 +458,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -500,7 +483,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -523,7 +506,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state) ?? Ext.CheckIfValidWaitTime(value);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -619,7 +602,7 @@ namespace WebSocketSharp.Server
       var usr = _listener.SslConfiguration.ServerCertificate != null;
       var port = EndPointListener.CertificateExists (_port, _listener.CertificateFolderPath);
       if (usr && port) {
-        _logger.Warn ("The server certificate associated with the port number already exists.");
+        Logger.Warn ("The server certificate associated with the port number already exists.");
         return null;
       }
 
@@ -637,8 +620,7 @@ namespace WebSocketSharp.Server
       _listener.Prefixes.Add (
         String.Format ("http{0}://{1}:{2}/", secure ? "s" : "", _hostname, port));
 
-      _logger = _listener.Log;
-      _services = new WebSocketServiceManager (_logger);
+      _services = new WebSocketServiceManager ();
       _sync = new object ();
 
       var os = Environment.OSVersion;
@@ -703,17 +685,17 @@ namespace WebSocketSharp.Server
                 processRequest (ctx);
               }
               catch (Exception ex) {
-                _logger.Fatal (ex.ToString ());
+                Logger.Fatal (ex.ToString ());
                 ctx.Connection.Close (true);
               }
             });
         }
         catch (HttpListenerException ex) {
-          _logger.Warn ("Receiving has been stopped.\n  reason: " + ex.Message);
+          Logger.Warn ("Receiving has been stopped.\n  reason: " + ex.Message);
           break;
         }
         catch (Exception ex) {
-          _logger.Fatal (ex.ToString ());
+          Logger.Fatal (ex.ToString ());
           break;
         }
       }
@@ -815,7 +797,7 @@ namespace WebSocketSharp.Server
                 (initializer == null ? "'initializer' is null." : null);
 
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -879,7 +861,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfValidServicePath(path);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return false;
       }
 
@@ -894,7 +876,7 @@ namespace WebSocketSharp.Server
       lock (_sync) {
         var msg = Ext.CheckIfStartable(_state) ?? checkIfCertificateExists ();
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -913,7 +895,7 @@ namespace WebSocketSharp.Server
       lock (_sync) {
         var msg = Ext.CheckIfStart(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -941,7 +923,7 @@ namespace WebSocketSharp.Server
       lock (_sync) {
         var msg = Ext.CheckIfStart(_state) ?? WebSocket.CheckCloseParameters (code, reason, false);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -977,7 +959,7 @@ namespace WebSocketSharp.Server
       lock (_sync) {
         var msg = Ext.CheckIfStart(_state) ?? WebSocket.CheckCloseParameters (code, reason, false);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 

@@ -161,7 +161,6 @@ namespace WebSocketSharp.Server
     #region Private Fields
 
     private Func<TBehavior>         _initializer;
-    private Logger                  _logger;
     private string                  _path;
     private WebSocketSessionManager _sessions;
 
@@ -169,12 +168,11 @@ namespace WebSocketSharp.Server
 
     #region Internal Constructors
 
-    internal WebSocketServiceHost (string path, Func<TBehavior> initializer, Logger logger)
+    internal WebSocketServiceHost (string path, Func<TBehavior> initializer)
     {
       _path = path;
       _initializer = initializer;
-      _logger = logger;
-      _sessions = new WebSocketSessionManager (logger);
+      _sessions = new WebSocketSessionManager ();
     }
 
     #endregion
@@ -189,7 +187,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_sessions.State);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -223,7 +221,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_sessions.State) ?? Ext.CheckIfValidWaitTime(value);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 

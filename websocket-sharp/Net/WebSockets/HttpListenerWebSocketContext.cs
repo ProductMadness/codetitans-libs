@@ -59,12 +59,6 @@ namespace WebSocketSharp.Net.WebSockets
 
     #region Internal Properties
 
-    internal Logger Log {
-      get {
-        return _context.Listener.Log;
-      }
-    }
-
     internal Stream Stream {
       get {
         return _context.Connection.Stream;

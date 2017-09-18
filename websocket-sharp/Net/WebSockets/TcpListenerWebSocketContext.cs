@@ -54,7 +54,6 @@ namespace WebSocketSharp.Net.WebSockets
     #region Private Fields
 
     private CookieCollection    _cookies;
-    private Logger              _logger;
     private NameValueCollection _queryString;
     private HttpRequest         _request;
     private bool                _secure;
@@ -72,12 +71,10 @@ namespace WebSocketSharp.Net.WebSockets
       TcpClient tcpClient,
       string protocol,
       bool secure,
-      ServerSslConfiguration sslConfig,
-      Logger logger)
+      ServerSslConfiguration sslConfig)
     {
       _tcpClient = tcpClient;
       _secure = secure;
-      _logger = logger;
 
       var netStream = tcpClient.GetStream ();
       if (secure) {
@@ -113,11 +110,6 @@ namespace WebSocketSharp.Net.WebSockets
       }
     }
 
-    internal Logger Log {
-      get {
-        return _logger;
-      }
-    }
 
     internal Stream Stream {
       get {

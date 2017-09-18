@@ -532,10 +532,9 @@ namespace WebSocketSharp
       TcpClient tcpClient,
       string protocol,
       bool secure,
-      ServerSslConfiguration sslConfig,
-      Logger logger)
+      ServerSslConfiguration sslConfig)
     {
-      return new TcpListenerWebSocketContext (tcpClient, protocol, secure, sslConfig, logger);
+      return new TcpListenerWebSocketContext (tcpClient, protocol, secure, sslConfig);
     }
 
     internal static byte[] InternalToByteArray (ushort value, ByteOrder order)

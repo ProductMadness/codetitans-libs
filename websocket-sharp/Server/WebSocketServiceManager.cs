@@ -46,7 +46,6 @@ namespace WebSocketSharp.Server
 
     private volatile bool                            _clean;
     private Dictionary<string, WebSocketServiceHost> _hosts;
-    private Logger                                   _logger;
     private volatile ServerState                     _state;
     private object                                   _sync;
     private TimeSpan                                 _waitTime;
@@ -56,13 +55,7 @@ namespace WebSocketSharp.Server
     #region Internal Constructors
 
     internal WebSocketServiceManager ()
-      : this (new Logger ())
     {
-    }
-
-    internal WebSocketServiceManager (Logger logger)
-    {
-      _logger = logger;
 
       _clean = true;
       _hosts = new Dictionary<string, WebSocketServiceHost> ();
@@ -222,7 +215,7 @@ namespace WebSocketSharp.Server
           completed ();
       }
       catch (Exception ex) {
-        _logger.Fatal (ex.ToString ());
+        Logger.Fatal (ex.ToString ());
       }
       finally {
         cache.Clear ();
@@ -244,7 +237,7 @@ namespace WebSocketSharp.Server
           completed ();
       }
       catch (Exception ex) {
-        _logger.Fatal (ex.ToString ());
+        Logger.Fatal (ex.ToString ());
       }
       finally {
         foreach (var cached in cache.Values)
@@ -290,13 +283,13 @@ namespace WebSocketSharp.Server
 
         WebSocketServiceHost host;
         if (_hosts.TryGetValue (path, out host)) {
-          _logger.Error (
+          Logger.Error (
             "A WebSocket service with the specified path already exists:\n  path: " + path);
 
           return;
         }
 
-        host = new WebSocketServiceHost<TBehavior> (path, initializer, _logger);
+        host = new WebSocketServiceHost<TBehavior> (path, initializer);
         if (!_clean)
           host.KeepClean = false;
 
@@ -319,7 +312,7 @@ namespace WebSocketSharp.Server
       }
 
       if (!ret)
-        _logger.Error (
+        Logger.Error (
           "A WebSocket service with the specified path isn't found:\n  path: " + path);
 
       return ret;
@@ -331,7 +324,7 @@ namespace WebSocketSharp.Server
       lock (_sync) {
         path = Ext.TrimEndSlash(HttpUtility.UrlDecode (path));
         if (!_hosts.TryGetValue (path, out host)) {
-          _logger.Error (
+          Logger.Error (
             "A WebSocket service with the specified path isn't found:\n  path: " + path);
 
           return false;
@@ -387,7 +380,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -407,7 +400,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -436,7 +429,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -464,7 +457,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -499,7 +492,7 @@ namespace WebSocketSharp.Server
                 (length < 1 ? "'length' is less than 1." : null);
 
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -508,12 +501,12 @@ namespace WebSocketSharp.Server
         data => {
           var len = data.Length;
           if (len == 0) {
-            _logger.Error ("The data cannot be read from 'stream'.");
+            Logger.Error ("The data cannot be read from 'stream'.");
             return;
           }
 
           if (len < length)
-            _logger.Warn (
+            Logger.Warn (
               String.Format (
                 "The data with 'length' cannot be read from 'stream':\n  expected: {0}\n  actual: {1}",
                 length,
@@ -524,7 +517,7 @@ namespace WebSocketSharp.Server
           else
             broadcast (Opcode.Binary, new MemoryStream (data), completed);
         },
-        ex => _logger.Fatal (ex.ToString ()));
+        ex => Logger.Fatal (ex.ToString ()));
     }
 
     /// <summary>
@@ -540,7 +533,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return null;
       }
 
@@ -569,7 +562,7 @@ namespace WebSocketSharp.Server
       byte[] data = null;
       var msg = Ext.CheckIfStart(_state) ?? WebSocket.CheckPingParameter (message, out data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return null;
       }
 
@@ -594,7 +587,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state) ?? Ext.CheckIfValidServicePath(path);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         host = null;
 
         return false;

@@ -83,7 +83,6 @@ namespace WebSocketSharp.Net
     private bool                                                 _disposed;
     private bool                                                 _ignoreWriteExceptions;
     private bool                                                 _listening;
-    private Logger                                               _logger;
     private HttpListenerPrefixCollection                         _prefixes;
     private string                                               _realm;
     private bool                                                 _reuseAddress;
@@ -110,8 +109,6 @@ namespace WebSocketSharp.Net
 
       _ctxRegistry = new Dictionary<HttpListenerContext, HttpListenerContext> ();
       _ctxRegistrySync = ((ICollection) _ctxRegistry).SyncRoot;
-
-      _logger = new Logger ();
 
       _prefixes = new HttpListenerPrefixCollection (this);
 
@@ -278,22 +275,6 @@ namespace WebSocketSharp.Net
       }
     }
 
-    /// <summary>
-    /// Gets the logging functions.
-    /// </summary>
-    /// <remarks>
-    /// The default logging level is <see cref="LogLevel.Error"/>. If you would like to change it,
-    /// you should set the <c>Log.Level</c> property to any of the <see cref="LogLevel"/> enum
-    /// values.
-    /// </remarks>
-    /// <value>
-    /// A <see cref="Logger"/> that provides the logging functions.
-    /// </value>
-    public Logger Log {
-      get {
-        return _logger;
-      }
-    }
 
     /// <summary>
     /// Gets the URI prefixes handled by the listener.

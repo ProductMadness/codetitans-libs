@@ -91,7 +91,6 @@ namespace WebSocketSharp
                                     _handshakeRequestChecker;
     private bool                    _ignoreExtensions;
     private bool                    _inContinuation;
-    private volatile Logger         _logger;
     private Queue<MessageEventArgs> _messageEventQueue;
     private uint                    _nonceCount;
     private string                  _origin;
@@ -127,7 +126,6 @@ namespace WebSocketSharp
       _protocol = protocol;
 
       _closeContext = context.Close;
-      _logger = context.Log;
       _secure = context.IsSecureConnection;
       _stream = context.Stream;
       _waitTime = TimeSpan.FromSeconds (1);
@@ -142,7 +140,6 @@ namespace WebSocketSharp
       _protocol = protocol;
 
       _closeContext = context.Close;
-      _logger = context.Log;
       _secure = context.IsSecureConnection;
       _stream = context.Stream;
       _waitTime = TimeSpan.FromSeconds (1);
@@ -202,7 +199,6 @@ namespace WebSocketSharp
 
       _base64Key = CreateBase64Key ();
       _client = true;
-      _logger = new Logger ();
       _secure = _uri.Scheme == "wss";
       _waitTime = TimeSpan.FromSeconds (5);
 
@@ -269,7 +265,7 @@ namespace WebSocketSharp
         lock (_forConn) {
           var msg = checkIfAvailable (false, false);
           if (msg != null) {
-            _logger.Error (msg);
+            Logger.Error (msg);
             error ("An error has occurred in setting the compression.", null);
 
             return;
@@ -344,7 +340,7 @@ namespace WebSocketSharp
         lock (_forConn) {
           var msg = checkIfAvailable (false, false);
           if (msg != null) {
-            _logger.Error (msg);
+            Logger.Error (msg);
             error ("An error has occurred in setting the enable redirection.", null);
 
             return;
@@ -393,27 +389,6 @@ namespace WebSocketSharp
     }
 
     /// <summary>
-    /// Gets the logging functions.
-    /// </summary>
-    /// <remarks>
-    /// The default logging level is <see cref="LogLevel.Error"/>. If you would like to change it,
-    /// you should set the <c>Log.Level</c> property to any of the <see cref="LogLevel"/> enum
-    /// values.
-    /// </remarks>
-    /// <value>
-    /// A <see cref="Logger"/> that provides the logging functions.
-    /// </value>
-    public Logger Log {
-      get {
-        return _logger;
-      }
-
-      internal set {
-        _logger = value;
-      }
-    }
-
-    /// <summary>
     /// Gets or sets the value of the HTTP Origin header to send with
     /// the WebSocket connection request to the server.
     /// </summary>
@@ -451,7 +426,7 @@ namespace WebSocketSharp
           }
 
           if (msg != null) {
-            _logger.Error (msg);
+            Logger.Error (msg);
             error ("An error has occurred in setting the origin.", null);
 
             return;
@@ -512,7 +487,7 @@ namespace WebSocketSharp
         lock (_forConn) {
           var msg = checkIfAvailable (false, false);
           if (msg != null) {
-            _logger.Error (msg);
+            Logger.Error (msg);
             error ("An error has occurred in setting the ssl configuration.", null);
 
             return;
@@ -552,7 +527,7 @@ namespace WebSocketSharp
         lock (_forConn) {
           var msg = checkIfAvailable (true, false) ?? Ext.CheckIfValidWaitTime(value);
           if (msg != null) {
-            _logger.Error (msg);
+            Logger.Error (msg);
             error ("An error has occurred in setting the wait time.", null);
 
             return;
@@ -594,12 +569,12 @@ namespace WebSocketSharp
     // As server
     private bool acceptHandshake ()
     {
-      _logger.Debug (
+      Logger.Debug (
         String.Format ("A connection request from {0}:\n{1}", _context.UserEndPoint, _context));
 
       var msg = checkIfValidHandshakeRequest (_context);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred while connecting.", null);
         Close (HttpStatusCode.BadRequest);
 
@@ -689,7 +664,7 @@ namespace WebSocketSharp
     {
       lock (_forConn) {
         if (_readyState == WebSocketState.Closing || _readyState == WebSocketState.Closed) {
-          _logger.Info ("Closing the connection has already been done.");
+          Logger.Info ("Closing the connection has already been done.");
           return;
         }
 
@@ -699,21 +674,21 @@ namespace WebSocketSharp
         _readyState = WebSocketState.Closing;
       }
 
-      _logger.Trace ("Begin closing the connection.");
+      Logger.Trace ("Begin closing the connection.");
 
       e.WasClean = closeHandshake (
         send ? WebSocketFrame.CreateCloseFrame (e.PayloadData, _client).ToByteArray () : null,
         wait ? _waitTime : TimeSpan.Zero,
         _client ? (Action) releaseClientResources : releaseServerResources);
 
-      _logger.Trace ("End closing the connection.");
+      Logger.Trace ("End closing the connection.");
 
       _readyState = WebSocketState.Closed;
       try {
         Ext.Emit(OnClose,this, e);
       }
       catch (Exception ex) {
-        _logger.Fatal (ex.ToString ());
+        Logger.Fatal (ex.ToString ());
         error ("An exception has occurred during an OnClose event.", ex);
       }
     }
@@ -747,7 +722,7 @@ namespace WebSocketSharp
       }
 
       var ret = sent && received;
-      _logger.Debug (
+      Logger.Debug (
         String.Format ("Was clean?: {0}\n  sent: {1}\n  received: {2}", ret, sent, received));
 
       return ret;
@@ -758,7 +733,7 @@ namespace WebSocketSharp
       lock (_forConn) {
         var msg = Ext.CheckIfConnectable(_readyState);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           error ("An error has occurred in connecting.", null);
 
           return false;
@@ -880,7 +855,7 @@ namespace WebSocketSharp
       var res = sendHandshakeRequest ();
       var msg = checkIfValidHandshakeResponse (res);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
 
         msg = "An error has occurred while connecting.";
         error (msg, null);
@@ -908,7 +883,7 @@ namespace WebSocketSharp
         Ext.Emit(OnError,this, new ErrorEventArgs (message, exception));
       }
       catch (Exception ex) {
-        _logger.Fatal (ex.ToString ());
+        Logger.Fatal (ex.ToString ());
       }
     }
 
@@ -973,9 +948,9 @@ namespace WebSocketSharp
       }
 
       if (code == CloseStatusCode.Abnormal || code == CloseStatusCode.TlsHandshakeFailure)
-        _logger.Fatal (exception.ToString ());
+        Logger.Fatal (exception.ToString ());
       else
-        _logger.Error (reason);
+        Logger.Error (reason);
 
       error (message ?? Ext.GetMessage(code), exception);
       if (!_client && _readyState == WebSocketState.Connecting) {
@@ -1018,7 +993,7 @@ namespace WebSocketSharp
     private bool processPingFrame (WebSocketFrame frame)
     {
       if (send (new WebSocketFrame (Opcode.Pong, frame.PayloadData, _client).ToByteArray ()))
-        _logger.Trace ("Returned a Pong.");
+        Logger.Trace ("Returned a Pong.");
 
       if (_emitOnPing)
         enqueueToMessageEventQueue (new MessageEventArgs (frame));
@@ -1029,7 +1004,7 @@ namespace WebSocketSharp
     private bool processPongFrame (WebSocketFrame frame)
     {
       _receivePong.Set ();
-      _logger.Trace ("Received a Pong.");
+      Logger.Trace ("Received a Pong.");
 
       return true;
     }
@@ -1081,7 +1056,7 @@ namespace WebSocketSharp
 
     private bool processUnsupportedFrame (WebSocketFrame frame, CloseStatusCode code, string reason)
     {
-      _logger.Debug ("An unsupported frame:" + frame.PrintToString (false));
+      Logger.Debug ("An unsupported frame:" + frame.PrintToString (false));
       processException (new WebSocketException (code, reason), null);
 
       return false;
@@ -1117,7 +1092,7 @@ namespace WebSocketSharp
     {
       lock (_forConn) {
         if (_readyState != WebSocketState.Open) {
-          _logger.Error ("Closing the connection has been done.");
+          Logger.Error ("Closing the connection has been done.");
           return false;
         }
 
@@ -1142,7 +1117,7 @@ namespace WebSocketSharp
             error ("Sending the data has been interrupted.", null);
         }
         catch (Exception ex) {
-          _logger.Fatal (ex.ToString ());
+          Logger.Fatal (ex.ToString ());
           error ("An exception has occurred while sending the data.", ex);
         }
         finally {
@@ -1206,7 +1181,7 @@ namespace WebSocketSharp
     {
       lock (_forConn) {
         if (_readyState != WebSocketState.Open) {
-          _logger.Error ("Closing the connection has been done.");
+          Logger.Error ("Closing the connection has been done.");
           return false;
         }
 
@@ -1228,7 +1203,7 @@ namespace WebSocketSharp
               completed (sent);
           }
           catch (Exception ex) {
-            _logger.Fatal (ex.ToString ());
+            Logger.Fatal (ex.ToString ());
             error ("An exception has occurred during a send callback.", ex);
           }
         },
@@ -1242,7 +1217,7 @@ namespace WebSocketSharp
         return true;
       }
       catch (Exception ex) {
-        _logger.Fatal (ex.ToString ());
+        Logger.Fatal (ex.ToString ());
         return false;
       }
     }
@@ -1254,15 +1229,15 @@ namespace WebSocketSharp
       var res = sendHttpRequest (req, 90000);
       if (res.IsUnauthorized) {
         var chal = res.Headers["WWW-Authenticate"];
-        _logger.Warn (String.Format ("Received an authentication requirement for '{0}'.", chal));
+        Logger.Warn (String.Format ("Received an authentication requirement for '{0}'.", chal));
         if (Ext.IsNullOrEmpty(chal)) {
-          _logger.Error ("No authentication challenge is specified.");
+          Logger.Error ("No authentication challenge is specified.");
           return res;
         }
 
         _authChallenge = AuthenticationChallenge.Parse (chal);
         if (_authChallenge == null) {
-          _logger.Error ("An invalid authentication challenge is specified.");
+          Logger.Error ("An invalid authentication challenge is specified.");
           return res;
         }
 
@@ -1282,17 +1257,17 @@ namespace WebSocketSharp
 
       if (res.IsRedirect) {
         var url = res.Headers["Location"];
-        _logger.Warn (String.Format ("Received a redirection to '{0}'.", url));
+        Logger.Warn (String.Format ("Received a redirection to '{0}'.", url));
         if (_enableRedirection) {
           if (Ext.IsNullOrEmpty(url)) {
-            _logger.Error ("No url to redirect is located.");
+            Logger.Error ("No url to redirect is located.");
             return res;
           }
 
           Uri uri;
           string msg;
           if (!Ext.TryCreateWebSocketUri(url,out uri, out msg)) {
-            _logger.Error ("An invalid url to redirect is located: " + msg);
+            Logger.Error ("An invalid url to redirect is located: " + msg);
             return res;
           }
 
@@ -1312,9 +1287,9 @@ namespace WebSocketSharp
     // As client
     private HttpResponse sendHttpRequest (HttpRequest request, int millisecondsTimeout)
     {
-      _logger.Debug ("A request to the server:\n" + request.ToString ());
+      Logger.Debug ("A request to the server:\n" + request.ToString ());
       var res = request.GetResponse (_stream, millisecondsTimeout);
-      _logger.Debug ("A response to this request:\n" + res.ToString ());
+      Logger.Debug ("A response to this request:\n" + res.ToString ());
 
       return res;
     }
@@ -1322,7 +1297,7 @@ namespace WebSocketSharp
     // As server
     private bool sendHttpResponse (HttpResponse response)
     {
-      _logger.Debug ("A response to this request:\n" + response.ToString ());
+      Logger.Debug ("A response to this request:\n" + response.ToString ());
       return sendBytes (response.ToByteArray ());
     }
 
@@ -1333,7 +1308,7 @@ namespace WebSocketSharp
       var res = sendHttpRequest (req, 90000);
       if (res.IsProxyAuthenticationRequired) {
         var chal = res.Headers["Proxy-Authenticate"];
-        _logger.Warn (
+        Logger.Warn (
           String.Format ("Received a proxy authentication requirement for '{0}'.", chal));
 
         if (Ext.IsNullOrEmpty(chal))
@@ -1468,12 +1443,12 @@ namespace WebSocketSharp
         var ext = e.Trim ();
         if (Ext.IsCompressionExtension(ext,_compression)) {
           if (!ext.Contains ("server_no_context_takeover")) {
-            _logger.Error ("The server hasn't sent back 'server_no_context_takeover'.");
+            Logger.Error ("The server hasn't sent back 'server_no_context_takeover'.");
             return false;
           }
 
           if (!ext.Contains ("client_no_context_takeover"))
-            _logger.Warn ("The server hasn't sent back 'client_no_context_takeover'.");
+            Logger.Warn ("The server hasn't sent back 'client_no_context_takeover'.");
 
           var method = Ext.ToExtensionString(_compression);
           var invalid = Ext.Contains(Ext.SplitHeaderValue(ext,';'),
@@ -1591,7 +1566,7 @@ namespace WebSocketSharp
     {
       lock (_forConn) {
         if (_readyState == WebSocketState.Closing || _readyState == WebSocketState.Closed) {
-          _logger.Info ("Closing the connection has already been done.");
+          Logger.Info ("Closing the connection has already been done.");
           return;
         }
 
@@ -1605,7 +1580,7 @@ namespace WebSocketSharp
         Ext.Emit(OnClose,this, e);
       }
       catch (Exception ex) {
-        _logger.Fatal (ex.ToString ());
+        Logger.Fatal (ex.ToString ());
       }
     }
 
@@ -1653,7 +1628,7 @@ namespace WebSocketSharp
                pong.WaitOne (timeout);
       }
       catch (Exception ex) {
-        _logger.Fatal (ex.ToString ());
+        Logger.Fatal (ex.ToString ());
         return false;
       }
     }
@@ -1664,7 +1639,7 @@ namespace WebSocketSharp
       lock (_forSend) {
         lock (_forConn) {
           if (_readyState != WebSocketState.Open) {
-            _logger.Error ("Closing the connection has been done.");
+            Logger.Error ("Closing the connection has been done.");
             return;
           }
 
@@ -1685,7 +1660,7 @@ namespace WebSocketSharp
             sendBytes (cached);
           }
           catch (Exception ex) {
-            _logger.Fatal (ex.ToString ());
+            Logger.Fatal (ex.ToString ());
           }
         }
       }
@@ -1708,7 +1683,7 @@ namespace WebSocketSharp
           send (opcode, cached, _compression != CompressionMethod.None);
         }
         catch (Exception ex) {
-          _logger.Fatal (ex.ToString ());
+          Logger.Fatal (ex.ToString ());
         }
       }
     }
@@ -1724,7 +1699,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfClosable(_readyState);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in closing the connection.", null);
 
         return;
@@ -1748,7 +1723,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfClosable(_readyState) ?? CheckCloseParameters (code, null, _client);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in closing the connection.", null);
 
         return;
@@ -1775,7 +1750,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfClosable(_readyState) ?? CheckCloseParameters (code, null, _client);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in closing the connection.", null);
 
         return;
@@ -1809,7 +1784,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfClosable(_readyState) ?? CheckCloseParameters (code, reason, _client);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in closing the connection.", null);
 
         return;
@@ -1843,7 +1818,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfClosable(_readyState) ?? CheckCloseParameters (code, reason, _client);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in closing the connection.", null);
 
         return;
@@ -1868,7 +1843,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfClosable(_readyState);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in closing the connection.", null);
 
         return;
@@ -1897,7 +1872,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfClosable(_readyState) ?? CheckCloseParameters (code, null, _client);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in closing the connection.", null);
 
         return;
@@ -1927,7 +1902,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfClosable(_readyState) ?? CheckCloseParameters (code, null, _client);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in closing the connection.", null);
 
         return;
@@ -1966,7 +1941,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfClosable(_readyState) ?? CheckCloseParameters (code, reason, _client);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in closing the connection.", null);
 
         return;
@@ -2006,7 +1981,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfClosable(_readyState) ?? CheckCloseParameters (code, reason, _client);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in closing the connection.", null);
 
         return;
@@ -2028,7 +2003,7 @@ namespace WebSocketSharp
     {
       var msg = checkIfCanConnect ();
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in connecting.", null);
 
         return;
@@ -2048,7 +2023,7 @@ namespace WebSocketSharp
     {
       var msg = checkIfCanConnect ();
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in connecting.", null);
 
         return;
@@ -2097,7 +2072,7 @@ namespace WebSocketSharp
       byte[] data;
       var msg = CheckPingParameter (message, out data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in sending the ping.", null);
 
         return false;
@@ -2116,7 +2091,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfOpen(_readyState) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in sending the data.", null);
 
         return;
@@ -2135,7 +2110,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfOpen(_readyState) ?? Ext.CheckIfValidSendData(file);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in sending the data.", null);
 
         return;
@@ -2154,7 +2129,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfOpen(_readyState) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in sending the data.", null);
 
         return;
@@ -2181,7 +2156,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfOpen(_readyState) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in sending the data.", null);
 
         return;
@@ -2209,7 +2184,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfOpen(_readyState) ?? Ext.CheckIfValidSendData(file);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in sending the data.", null);
 
         return;
@@ -2236,7 +2211,7 @@ namespace WebSocketSharp
     {
       var msg = Ext.CheckIfOpen(_readyState) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in sending the data.", null);
 
         return;
@@ -2270,7 +2245,7 @@ namespace WebSocketSharp
                 (length < 1 ? "'length' is less than 1." : null);
 
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         error ("An error has occurred in sending the data.", null);
 
         return;
@@ -2281,14 +2256,14 @@ namespace WebSocketSharp
         data => {
           var len = data.Length;
           if (len == 0) {
-            _logger.Error ("The data cannot be read from 'stream'.");
+            Logger.Error ("The data cannot be read from 'stream'.");
             error ("An error has occurred in sending the data.", null);
 
             return;
           }
 
           if (len < length)
-            _logger.Warn (
+            Logger.Warn (
               String.Format (
                 "The data with 'length' cannot be read from 'stream':\n  expected: {0}\n  actual: {1}",
                 length,
@@ -2299,7 +2274,7 @@ namespace WebSocketSharp
             completed (sent);
         },
         ex => {
-          _logger.Fatal (ex.ToString ());
+          Logger.Fatal (ex.ToString ());
           error ("An exception has occurred while sending the data.", ex);
         });
     }
@@ -2316,7 +2291,7 @@ namespace WebSocketSharp
       lock (_forConn) {
         var msg = checkIfAvailable (false, false) ?? (cookie == null ? "'cookie' is null." : null);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           error ("An error has occurred in setting the cookie.", null);
 
           return;
@@ -2350,7 +2325,7 @@ namespace WebSocketSharp
           if (Ext.IsNullOrEmpty(username)) {
             _credentials = null;
             _preAuth = false;
-            _logger.Warn ("The credentials were set back to the default.");
+            Logger.Warn ("The credentials were set back to the default.");
 
             return;
           }
@@ -2363,7 +2338,7 @@ namespace WebSocketSharp
         }
 
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           error ("An error has occurred in setting the credentials.", null);
 
           return;
@@ -2397,7 +2372,7 @@ namespace WebSocketSharp
           if (Ext.IsNullOrEmpty(url)) {
             _proxyUri = null;
             _proxyCredentials = null;
-            _logger.Warn ("The proxy url and credentials were set back to the default.");
+            Logger.Warn ("The proxy url and credentials were set back to the default.");
 
             return;
           }
@@ -2413,7 +2388,7 @@ namespace WebSocketSharp
 
             if (Ext.IsNullOrEmpty(username)) {
               _proxyCredentials = null;
-              _logger.Warn ("The proxy credentials were set back to the default.");
+              Logger.Warn ("The proxy credentials were set back to the default.");
 
               return;
             }
@@ -2427,7 +2402,7 @@ namespace WebSocketSharp
         }
 
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           error ("An error has occurred in setting the proxy.", null);
 
           return;

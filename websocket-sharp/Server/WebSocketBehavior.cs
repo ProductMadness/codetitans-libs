@@ -70,19 +70,6 @@ namespace WebSocketSharp.Server
     #endregion
 
     #region Protected Properties
-
-    /// <summary>
-    /// Gets the logging functions.
-    /// </summary>
-    /// <value>
-    /// A <see cref="Logger"/> that provides the logging functions,
-    /// or <see langword="null"/> if the WebSocket connection isn't established.
-    /// </value>
-    protected Logger Log {
-      get {
-        return _websocket != null ? _websocket.Log : null;
-      }
-    }
     
     /// <summary>
     /// Gets the access to the sessions in the WebSocket service.
@@ -342,7 +329,7 @@ namespace WebSocketSharp.Server
     internal void Start (WebSocketContext context, WebSocketSessionManager sessions)
     {
       if (_websocket != null) {
-        _websocket.Log.Error ("This session has already been started.");
+        Logger.Error ("This session has already been started.");
         context.WebSocket.Close (HttpStatusCode.ServiceUnavailable);
 
         return;

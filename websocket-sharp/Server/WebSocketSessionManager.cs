@@ -46,7 +46,6 @@ namespace WebSocketSharp.Server
 
     private volatile bool                         _clean;
     private object                                _forSweep;
-    private Logger                                _logger;
     private Dictionary<string, IWebSocketSession> _sessions;
     private volatile ServerState                  _state;
     private volatile bool                         _sweeping;
@@ -58,15 +57,9 @@ namespace WebSocketSharp.Server
 
     #region Internal Constructors
 
+
     internal WebSocketSessionManager ()
-      : this (new Logger ())
     {
-    }
-
-    internal WebSocketSessionManager (Logger logger)
-    {
-      _logger = logger;
-
       _clean = true;
       _forSweep = new object ();
       _sessions = new Dictionary<string, IWebSocketSession> ();
@@ -244,7 +237,7 @@ namespace WebSocketSharp.Server
           completed ();
       }
       catch (Exception ex) {
-        _logger.Fatal (ex.ToString ());
+        Logger.Fatal (ex.ToString ());
       }
       finally {
         cache.Clear ();
@@ -260,7 +253,7 @@ namespace WebSocketSharp.Server
           completed ();
       }
       catch (Exception ex) {
-        _logger.Fatal (ex.ToString ());
+        Logger.Fatal (ex.ToString ());
       }
       finally {
         foreach (var cached in cache.Values)
@@ -298,7 +291,7 @@ namespace WebSocketSharp.Server
         ret = _sessions.TryGetValue (id, out session);
 
       if (!ret)
-        _logger.Error ("A session with the specified ID isn't found:\n  ID: " + id);
+        Logger.Error ("A session with the specified ID isn't found:\n  ID: " + id);
 
       return ret;
     }
@@ -396,7 +389,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -416,7 +409,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -445,7 +438,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -473,7 +466,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state) ?? Ext.CheckIfValidSendData(data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -508,7 +501,7 @@ namespace WebSocketSharp.Server
                 (length < 1 ? "'length' is less than 1." : null);
 
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -517,12 +510,12 @@ namespace WebSocketSharp.Server
         data => {
           var len = data.Length;
           if (len == 0) {
-            _logger.Error ("The data cannot be read from 'stream'.");
+            Logger.Error ("The data cannot be read from 'stream'.");
             return;
           }
 
           if (len < length)
-            _logger.Warn (
+            Logger.Warn (
               String.Format (
                 "The data with 'length' cannot be read from 'stream':\n  expected: {0}\n  actual: {1}",
                 length,
@@ -533,7 +526,7 @@ namespace WebSocketSharp.Server
           else
             broadcast (Opcode.Binary, new MemoryStream (data), completed);
         },
-        ex => _logger.Fatal (ex.ToString ()));
+        ex => Logger.Fatal (ex.ToString ()));
     }
 
     /// <summary>
@@ -548,7 +541,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return null;
       }
 
@@ -575,7 +568,7 @@ namespace WebSocketSharp.Server
       byte[] data = null;
       var msg = Ext.CheckIfStart(_state) ?? WebSocket.CheckPingParameter (message, out data);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return null;
       }
 
@@ -834,7 +827,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfStart(_state) ?? Ext.CheckIfValidSessionID(id);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         session = null;
 
         return false;

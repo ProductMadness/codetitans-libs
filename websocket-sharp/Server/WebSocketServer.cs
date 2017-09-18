@@ -66,7 +66,6 @@ namespace WebSocketSharp.Server
     private bool                               _dnsStyle;
     private string                             _hostname;
     private TcpListener                        _listener;
-    private Logger                             _logger;
     private int                                _port;
     private string                             _realm;
     private Thread                             _receiveThread;
@@ -305,7 +304,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -353,28 +352,11 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
         _services.KeepClean = value;
-      }
-    }
-
-    /// <summary>
-    /// Gets the logging functions.
-    /// </summary>
-    /// <remarks>
-    /// The default logging level is <see cref="LogLevel.Error"/>. If you would like to change it,
-    /// you should set the <c>Log.Level</c> property to any of the <see cref="LogLevel"/> enum
-    /// values.
-    /// </remarks>
-    /// <value>
-    /// A <see cref="Logger"/> that provides the logging functions.
-    /// </value>
-    public Logger Log {
-      get {
-        return _logger;
       }
     }
 
@@ -405,7 +387,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -433,7 +415,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -457,7 +439,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -482,7 +464,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -505,7 +487,7 @@ namespace WebSocketSharp.Server
       set {
         var msg = Ext.CheckIfStartable(_state) ?? Ext.CheckIfValidWaitTime(value);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -602,8 +584,7 @@ namespace WebSocketSharp.Server
       _authSchemes = AuthenticationSchemes.Anonymous;
       _dnsStyle = Uri.CheckHostName (hostname) == UriHostNameType.Dns;
       _listener = new TcpListener (address, port);
-      _logger = new Logger ();
-      _services = new WebSocketServiceManager (_logger);
+      _services = new WebSocketServiceManager ();
       _sync = new object ();
     }
 
@@ -640,7 +621,7 @@ namespace WebSocketSharp.Server
           ThreadPool.QueueUserWorkItem (
             state => {
               try {
-                var ctx = Ext.GetWebSocketContext(cl, null, _secure, _sslConfig, _logger);
+                var ctx = Ext.GetWebSocketContext(cl, null, _secure, _sslConfig);
                 if (_authSchemes != AuthenticationSchemes.Anonymous &&
                     !authenticate (ctx, _authSchemes, Realm, UserCredentialsFinder))
                   return;
@@ -648,17 +629,17 @@ namespace WebSocketSharp.Server
                 processRequest (ctx);
               }
               catch (Exception ex) {
-                _logger.Fatal (ex.ToString ());
+                Logger.Fatal (ex.ToString ());
                 cl.Close ();
               }
             });
         }
         catch (SocketException ex) {
-          _logger.Warn ("Receiving has been stopped.\n  reason: " + ex.Message);
+          Logger.Warn ("Receiving has been stopped.\n  reason: " + ex.Message);
           break;
         }
         catch (Exception ex) {
-          _logger.Fatal (ex.ToString ());
+          Logger.Fatal (ex.ToString ());
           break;
         }
       }
@@ -737,7 +718,7 @@ namespace WebSocketSharp.Server
                 (initializer == null ? "'initializer' is null." : null);
 
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return;
       }
 
@@ -782,7 +763,7 @@ namespace WebSocketSharp.Server
     {
       var msg = Ext.CheckIfValidServicePath(path);
       if (msg != null) {
-        _logger.Error (msg);
+        Logger.Error (msg);
         return false;
       }
 
@@ -797,7 +778,7 @@ namespace WebSocketSharp.Server
       lock (_sync) {
         var msg = Ext.CheckIfStartable(_state) ?? checkIfCertificateExists ();
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -816,7 +797,7 @@ namespace WebSocketSharp.Server
       lock (_sync) {
         var msg = Ext.CheckIfStart(_state);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -844,7 +825,7 @@ namespace WebSocketSharp.Server
       lock (_sync) {
         var msg = Ext.CheckIfStart(_state) ?? WebSocket.CheckCloseParameters (code, reason, false);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 
@@ -879,7 +860,7 @@ namespace WebSocketSharp.Server
       lock (_sync) {
         var msg = Ext.CheckIfStart(_state) ?? WebSocket.CheckCloseParameters (code, reason, false);
         if (msg != null) {
-          _logger.Error (msg);
+          Logger.Error (msg);
           return;
         }
 

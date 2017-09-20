@@ -50,35 +50,35 @@ namespace WebSocketSharp
         internal static void Fatal(string message)
         {
             if (ExtLogger != null)
-                ExtLogger.Debug(message);
+                ExtLogger.Fatal(message);
         }
 
         /// <inheritdoc />
         internal static void Warn(string message)
         {
             if (ExtLogger != null)
-                ExtLogger.Debug(message);
+                ExtLogger.Warn(message);
         }
 
         /// <inheritdoc />
         internal static void Trace(string message)
         {
             if (ExtLogger != null)
-                ExtLogger.Debug(message);
+                ExtLogger.Trace(message);
         }
 
         /// <inheritdoc />
         internal static void Error(string message)
         {
             if (ExtLogger != null)
-                ExtLogger.Debug(message);
+                ExtLogger.Error(message);
         }
 
         /// <inheritdoc />
         internal static void Info(string message)
         {
             if (ExtLogger != null)
-                ExtLogger.Debug(message);
+                ExtLogger.Info(message);
         }
 
         #endregion

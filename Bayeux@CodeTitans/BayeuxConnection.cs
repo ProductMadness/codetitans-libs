@@ -105,7 +105,7 @@ namespace CodeTitans.Bayeux
             {
                 _url = "ws" + url.Substring(4);
                 DefaultConnectionType = BayeuxConnectionTypes.WebSocket;
-                _webSocket = new WebSocket(_url);
+                _webSocket = new DestroyOnDisposeWebSocket(_url);
                 _webSocket.OnOpen += (sender, args) =>
                 {
 				};
@@ -1090,7 +1090,7 @@ namespace CodeTitans.Bayeux
 
                 if (_webSocket != null)
                 {
-                    _webSocket.Close();
+                    ((IDisposable) _webSocket).Dispose();
                     _webSocket = null;
                 }
             }

@@ -28,7 +28,7 @@ namespace WebSocketSharp
         /// </remarks>
         void IDisposable.Dispose ()
         {
-            close (new CloseEventArgs (CloseStatusCode.Away), false, true);
+            close (new CloseEventArgs (CloseStatusCode.Away), false, false);
         }
 
         #endregion

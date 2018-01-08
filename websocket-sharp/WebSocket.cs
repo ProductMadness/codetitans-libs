@@ -660,7 +660,7 @@ namespace WebSocketSharp
                    : null;
     }
 
-    private void close (CloseEventArgs e, bool send, bool wait)
+    protected void close (CloseEventArgs e, bool send, bool wait)
     {
       lock (_forConn) {
         if (_readyState == WebSocketState.Closing || _readyState == WebSocketState.Closed) {

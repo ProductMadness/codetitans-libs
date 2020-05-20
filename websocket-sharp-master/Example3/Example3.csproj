@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Example3</RootNamespace>
     <AssemblyName>example3</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

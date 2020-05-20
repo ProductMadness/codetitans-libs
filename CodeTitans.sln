@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeTitans.Bayeux.VS2010", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeTitans.IoC.VS2010", "IoC@CodeTitans\CodeTitans.IoC.VS2010.csproj", "{466246E6-7B02-4BDB-8EB2-705A908EAF4C}"
 EndProject
-#Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeTitans.UnitTests.VS2012", "CodeTitans.UnitTests\CodeTitans.UnitTests.VS2012.csproj", "{720677A1-5893-49AC-BAD9-EC400E3F89E6}"
-#EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "websocket", "websocket-sharp\websocket.csproj", "{B357BAC7-529E-4D81-A0D2-71041B19C8DE}"
 EndProject
 Global
